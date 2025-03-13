@@ -1,0 +1,32 @@
+from google import genai
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+
+def get_gemini_key():
+    return os.environ.get("GEMINI_API_KEY")
+
+
+def get_gemini_client():
+    key = get_gemini_key()
+    client = genai.Client(api_key=key)
+    return client
+
+
+def get_single_call_gemini_response(
+    client,
+    model_name="gemini-2.0-flash",
+    question="what can you do?",
+):
+    response = client.models.generate_content(model=model_name, contents=question)
+    return response
+
+
+def get_chat_gemini_response(
+    client, model_name="gemini-2.0-flash", question="what can you do?"
+):
+    chat = client.chats.create(model=model_name)
+    response = chat.send_message(message=question)
+    return response
