@@ -9,6 +9,11 @@ from googleapiclient.discovery import build
 from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from datetime import datetime, timedelta
+import logging
+
+# from googleapiclient.errors import HttpError
+
+logger = logging.getLogger(__name__)
 
 SCOPES = [
     "https://www.googleapis.com/auth/gmail.readonly",
@@ -43,7 +48,13 @@ class GmailToolKit:
         print(f"[{datetime.now()}] {message}")
 
     def authenticate(self):
-        """Authenticate with Gmail API and initialize service."""
+        """
+        Authenticate with Gmail API and initialize service.
+        Initially uses creds.json file to initiate OAuth2 flow.
+        If token.pickle exists, it loads the credentials from there.
+        If the token.pickle file does not exist, it creates a new one after successful authentication.
+        If the token.pickle file is invalid or expired, it refreshes them or prompts for re-authentication. ## yet to be implemented
+        """
         creds = None
         if os.path.exists(self.token_file):
             with open(self.token_file, "rb") as token:
@@ -146,7 +157,9 @@ class GmailToolKit:
             self.log(f"Error retrieving email {message_id}: {str(e)}")
             return None
 
-    def check_emails(self, query="is:unread", max_results=1, date=None):
+    def check_emails(
+        self, query: str = "is:unread", max_results: int = 1, date: str = None
+    ) -> list:
         """Check for emails matching the given query and optional date filter in (d, m, y) format."""
         try:
             # If a date is provided, convert it from (d, m, y) to YYYY/MM/DD format
@@ -157,7 +170,7 @@ class GmailToolKit:
                     )  # Expecting "10/3/2024"
                     date_obj = datetime(year, month, day)
                     next_day = date_obj + timedelta(days=1)
-    
+
                     # Modify the query to fetch emails from that specific date
                     query += f" after:{date_obj.strftime('%Y/%m/%d')} before:{next_day.strftime('%Y/%m/%d')}"
                 except ValueError:
@@ -195,10 +208,11 @@ class GmailToolKit:
                 continue
 
             try:
-                recent_emails = self.check_emails(max_results=max_results, date=date)
-                if recent_emails:
-                    self.recent_emails = recent_emails
-                    self.save_emails_to_json(recent_emails)
+                self.recent_emails = self.check_emails(
+                    max_results=max_results, date=date
+                )
+                if self.recent_emails:
+                    self.save_emails_to_json(self.recent_emails)
                 self.last_check_time = datetime.now()
                 time.sleep(self.interval)
             except Exception as e:
@@ -253,6 +267,7 @@ class GmailToolKit:
 if __name__ == "__main__":
     tool = GmailToolKit()
     tool.start()
+    # print(tool.check_emails())
     time.sleep(10)
     tool.pause()
     time.sleep(5)

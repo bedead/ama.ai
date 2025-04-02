@@ -1,6 +1,7 @@
 from google import genai
 from dotenv import load_dotenv
 import os
+from google.genai.types import GenerateContentConfig, HttpOptions
 
 load_dotenv()
 
@@ -17,10 +18,17 @@ def get_gemini_client():
 
 def get_single_call_gemini_response(
     client,
+    system_instruction: str = None,
     model_name="gemini-2.0-flash",
-    question="what can you do?",
+    contents="what can you do?",
 ):
-    response = client.models.generate_content(model=model_name, contents=question)
+    response = client.models.generate_content(
+        model=model_name,
+        config=GenerateContentConfig(
+            system_instruction=system_instruction,
+        ),
+        contents=contents,
+    )
     return response
 
 

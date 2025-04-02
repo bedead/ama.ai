@@ -1,10 +1,11 @@
 import os
 import json
+from typing import List
 import markdown
 from bs4 import BeautifulSoup
 
 
-class EmailReader:
+class JSONEmailReader:
     def __init__(self, json_file="emails.json"):
         self.json_file = json_file
 
@@ -43,7 +44,7 @@ class EmailReader:
         # Remove extra spaces and newlines
         return " ".join(text.split())
 
-    def get_email_content(self):
+    def get_email_content(self) -> List[dict]:
         """Return a list of emails with sender, subject, date, and body as plain text."""
         emails = self.load_emails()
         if not emails:
@@ -76,7 +77,7 @@ class EmailReader:
 
 # Example usage
 if __name__ == "__main__":
-    reader = EmailReader()
+    reader = JSONEmailReader()
     emails = reader.get_email_content()
 
     if isinstance(emails, list):
