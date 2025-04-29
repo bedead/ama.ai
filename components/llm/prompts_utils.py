@@ -24,8 +24,8 @@ MAIL_SUMMARY_PROMPT = dedent(
 
 GENERATE_MAIL_RESPONSE_SUGGESTION_PROMPT = dedent(
     """
-    Gmail Data: {gmail_data},
-    Format Type: {response_foramt}
+    Generate a response to the given email data.
+    Mail Response Format Type: {response_foramt}
     """
 )
 

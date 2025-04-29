@@ -4,9 +4,9 @@ from components.llm.prompts_utils import (
 )
 
 
-def generate_response_suggestion(data: dict) -> str:
+def generate_response_suggestion(data: dict, response_format_type: str) -> str:
     client = get_gemini_client()
-    
+
     response = get_single_call_gemini_response(
         client, system_instruction=system_instructions, contents=str(data)
     )

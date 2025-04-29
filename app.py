@@ -48,12 +48,11 @@ while True:
                     ## check if output in following options, if yes procced
                     if response in ["proffessional", "formal"]:
                         ## generating mail response based on gmail data, and predicted response format
-                        generate_response_suggestion(
+                        mail_response_suggestion = generate_response_suggestion(
                             data=mail_data, response_format_type=response
                         )
 
-                        
-                    
+                        print(f"Response Suggestion: {mail_response_suggestion}")
 
             else:
                 gmail_tool.resume()
