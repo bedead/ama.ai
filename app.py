@@ -1,8 +1,13 @@
-from components.llm.utils import get_gemini_client, get_chat_gemini_response
+from components.llm.utils import get_gemini_client
 from components.gmail.gmail_toolkit import GmailToolKit
-from components.llm.routes.mail_important import get_mail_importance_decision
+from components.llm.routes.mail_important import is_mail_important
+from components.llm.routes.respone_route import is_mail_response_needed
+from components.llm.routes.response_format_route import (
+    is_response_proffessional_or_formal,
+)
 from components.json.reader import JSONEmailReader
 from components.llm.process.email_summary import mail_summary
+from components.llm.process.email_response import generate_response_suggestion
 
 from typing import List
 
@@ -17,20 +22,42 @@ while True:
     if isinstance(emails, List) and len(emails) > 0:
         print(f"Number of emails: {len(emails)}")
         gmail_tool.pause()
-        for email in emails:
-            str_email = f"From: {email['sender']}\nSubject: {email['subject']}"
+        for mail_data in emails:
+            str_email = f"From: {mail_data['sender']}\nSubject: {mail_data['subject']}"
             print(str_email)
-            decision: dict = get_mail_importance_decision(email, json_output=True)
+            response: dict = is_mail_important(mail_data, json_output=True)
 
-            print(f"Decision:{decision.get('output').lower()}")
+            print(f"Decision:{response.get('output').lower()}")
             print("=" * 80)  # Separator
-            if decision.get("output").lower() == "yes":
-                summarry: str = mail_summary(data=email)
+            ## checking if mail is important or not, if important summaries and process further
+            if response.get("output").lower() == "yes":
+                summarry: str = mail_summary(data=mail_data)
                 print(f"Summary: {summarry}")
+
+                ## checking if the mail requires some response
+                response: dict = is_mail_response_needed(
+                    data=mail_data, json_output=True
+                )
+
+                if response.get("output").lower() == "yes":
+                    ## analyze response format
+                    response: dict = is_response_proffessional_or_formal(
+                        data=mail_data, json_output=True
+                    )
+                    response = response.get("output").lower()
+                    ## check if output in following options, if yes procced
+                    if response in ["proffessional", "formal"]:
+                        ## generating mail response based on gmail data, and predicted response format
+                        generate_response_suggestion(
+                            data=mail_data, response_format_type=response
+                        )
+
+                        
+                    
 
             else:
                 gmail_tool.resume()
-                print(f"Skipped email from {email['sender']}")
+                print(f"Skipped email from {mail_data['sender']}")
     else:
         gmail_tool.resume()
         print("No emails found.")

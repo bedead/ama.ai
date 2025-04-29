@@ -4,3 +4,4 @@ creds.json
 emails.json
 venv
 
+**/__pycache__/

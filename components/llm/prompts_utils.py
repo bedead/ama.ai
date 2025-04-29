@@ -1,5 +1,7 @@
 from textwrap import dedent
 
+## LLM RESPONSE GENERATE
+
 MAIL_SUMMARY_PROMPT = dedent(
     """
     Summarize the given email data into a concise format. 
@@ -18,6 +20,18 @@ MAIL_SUMMARY_PROMPT = dedent(
     (Additional information): You can you add emotional/scenario/etc judgment of the mail in the beginning or end of the summary. 
     """
 )
+
+
+GENERATE_MAIL_RESPONSE_SUGGESTION_PROMPT = dedent(
+    """
+    Gmail Data: {gmail_data},
+    Format Type: {response_foramt}
+    """
+)
+
+
+## ROUTES FOR DECISION MAKING
+
 IS_MAIL_IMPORTANT_PROMPT = dedent(
     """
     Analyze the given email data to determine if it is important or not. 
@@ -35,5 +49,19 @@ IS_MAIL_IMPORTANT_PROMPT = dedent(
     Return the result only as shown below and no other text required:
     yes   # If the email is important
     no    # If the email is not important 
+    """
+)
+
+
+IS_RESPONSE_NEEDED_PROMPT = dedent(
+    """
+    
+    """
+)
+
+
+MAIL_RESPONSE_FORMAT_PROMPT = dedent(
+    """
+    
     """
 )
