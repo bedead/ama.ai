@@ -1,3 +1,6 @@
+import logging
+from typing import List
+
 from components.llm.utils import get_gemini_client
 from components.gmail.gmail_toolkit import GmailToolKit
 from components.llm.routes.mail_important import is_mail_important
@@ -9,61 +12,89 @@ from components.json.reader import JSONEmailReader
 from components.llm.process.email_summary import mail_summary
 from components.llm.process.email_response import generate_response_suggestion
 
-from typing import List
+# Setup logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+)
 
-gmail_tool = GmailToolKit()
-email_reader = JSONEmailReader()
-gmail_tool.start()
+logger = logging.getLogger(__name__)
 
 
-client = get_gemini_client()
-while True:
-    emails: List[dict] = email_reader.get_email_content()
-    if isinstance(emails, List) and len(emails) > 0:
-        print(f"Number of emails: {len(emails)}")
+def main():
+    gmail_tool = GmailToolKit()
+    email_reader = JSONEmailReader()
+    gmail_tool.start()
+
+    client = get_gemini_client()
+
+    while True:
+        emails: List[dict] = email_reader.get_email_content()
+
+        if not isinstance(emails, list) or not emails:
+            logger.info("No emails found.")
+            gmail_tool.resume()
+            continue
+
+        logger.info(f"Number of emails: {len(emails)}")
         gmail_tool.pause()
+
         for mail_data in emails:
-            str_email = f"From: {mail_data['sender']}\nSubject: {mail_data['subject']}"
-            print(str_email)
-            response: dict = is_mail_important(mail_data, json_output=True)
+            logger.info(
+                f"Processing email from {mail_data['sender']} - Subject: {mail_data['subject']}"
+            )
 
-            print(f"Decision:{response.get('output').lower()}")
-            print("=" * 80)  # Separator
-            ## checking if mail is important or not, if important summaries and process further
-            if response.get("output").lower() == "yes":
-                summarry: str = mail_summary(data=mail_data)
-                print(f"Summary: {summarry}")
+            important_response = is_mail_important(mail_data, json_output=True)
+            decision1 = important_response.get("output", "").lower().strip()
 
-                ## checking if the mail requires some response
-                response: dict = is_mail_response_needed(
+            logger.debug(
+                f"is_mail_important output: '{decision1}' (ASCII: {[ord(c) for c in decision1]})"
+            )
+
+            if decision1 == "yes":
+                logger.info("Email identified as important.")
+
+                summary = mail_summary(data=mail_data)
+                logger.info(f"Summary generated: {summary}")
+
+                response_needed = is_mail_response_needed(
                     data=mail_data, json_output=True
                 )
+                if response_needed.get("output", "").lower().strip() == "yes":
+                    logger.info("Response required for this email.")
 
-                if response.get("output").lower() == "yes":
-                    ## analyze response format
-                    response: dict = is_response_proffessional_or_formal(
+                    format_response = is_response_proffessional_or_formal(
                         data=mail_data, json_output=True
                     )
-                    response = response.get("output").lower()
-                    ## check if output in following options, if yes procced
-                    if response in ["proffessional", "formal"]:
-                        ## generating mail response based on gmail data, and predicted response format
-                        mail_response_suggestion = generate_response_suggestion(
-                            data=mail_data, response_format_type=response
+                    response_format = format_response.get("output", "").lower().strip()
+
+                    if response_format in ["proffessional", "formal"]:
+                        logger.info(
+                            f"Email format identified as '{response_format}'. Generating response..."
                         )
-
-                        print(f"Response Suggestion: {mail_response_suggestion}")
-
+                        response_suggestion = generate_response_suggestion(
+                            data=mail_data, response_format_type=response_format
+                        )
+                        logger.info(f"Suggested Response: {response_suggestion}")
+                    else:
+                        logger.info(
+                            f"Response format '{response_format}' not suitable for automated suggestion."
+                        )
+                else:
+                    logger.info("No response required for this email.")
             else:
+                logger.info(
+                    f"Email from {mail_data['sender']} identified as not important. Skipping."
+                )
                 gmail_tool.resume()
-                print(f"Skipped email from {mail_data['sender']}")
-    else:
-        gmail_tool.resume()
-        print("No emails found.")
 
-    question = input("You: ")
-    # response = get_chat_gemini_response(client, question=question)
-    # print(f"AI: {response.text}")
-    if question.lower() == "exit":
-        gmail_tool.stop()
-        break
+        # Prompt user input (manual control loop)
+        question = input("You: ")
+        if question.lower() == "exit":
+            logger.info("Exiting system and stopping Gmail tool.")
+            gmail_tool.stop()
+            break
+
+
+if __name__ == "__main__":
+    main()
