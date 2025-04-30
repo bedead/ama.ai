@@ -90,7 +90,7 @@ class AIToolkit:
 
 
 # Usage example:
-def get_ai_toolkit(llm_type: str = "gemini") -> AIToolkit:
+def get_ai_toolkit(llm_type: str = "gemini" or "groq") -> AIToolkit:
     if llm_type.lower() == "gemini":
         llm = GeminiLLM()
     elif llm_type.lower() == "groq":

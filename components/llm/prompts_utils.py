@@ -44,7 +44,7 @@ IS_MAIL_IMPORTANT_PROMPT = dedent(
 
     Criteria for Importance:
     - Emails from **known contacts**, urgent language, or **action-required** content  
-    - **Work-related** or critical **personal matters** or **financial transactions** or **legal matters** or **Mail related for inquiry or maybe some friend contacting**   
+    - **Work-related** or critical **personal matters** or **Friends MSG** or **financial transactions** or **legal matters** or **Mail related for inquiry or maybe some friend contacting**   
     - **High-priority keywords** (e.g., "urgent," "important," "invoice," "deadline", "job accptance", "meeting", "interview", "offer", "contract", "payment", "confirmation")  
     - **Attachments** that are relevant to the email's content
     - **Follow-up** emails on previous conversations
