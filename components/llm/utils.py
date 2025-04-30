@@ -1,18 +1,22 @@
 from google import genai
 from dotenv import load_dotenv
 import os
-from google.genai.types import GenerateContentConfig, HttpOptions
+from google.genai.types import GenerateContentConfig
 from typing import List
 
 load_dotenv()
 
 
-def get_gemini_key():
+def get_google_gemini_key():
     return os.environ.get("GEMINI_API_KEY")
 
 
+def get_groq_key():
+    return os.environ.get("GROQ_API_KEY")
+
+
 def get_gemini_client():
-    key = get_gemini_key()
+    key = get_google_gemini_key()
     client = genai.Client(api_key=key)
     return client
 
@@ -20,7 +24,7 @@ def get_gemini_client():
 def get_single_call_gemini_response(
     client,
     system_instruction: str = None,
-    model_name="gemini-2.0-flash",
+    model_name="gemini-1.5-flash",
     contents: List[str] = ["what can you do?"],
 ):
     response = client.models.generate_content(
