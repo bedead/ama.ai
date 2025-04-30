@@ -6,8 +6,8 @@ from components.llm.prompts_utils import (
 
 def generate_response_suggestion(data: dict, response_format_type: str) -> str:
     client = get_gemini_client()
-
+    system_instructions.format(chosen_format=response_format_type)
     response = get_single_call_gemini_response(
-        client, system_instruction=system_instructions, contents=str(data)
+        client, system_instruction=system_instructions, contents=[str(data)]
     )
     return response.text

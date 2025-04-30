@@ -2,6 +2,7 @@ from google import genai
 from dotenv import load_dotenv
 import os
 from google.genai.types import GenerateContentConfig, HttpOptions
+from typing import List
 
 load_dotenv()
 
@@ -20,7 +21,7 @@ def get_single_call_gemini_response(
     client,
     system_instruction: str = None,
     model_name="gemini-2.0-flash",
-    contents="what can you do?",
+    contents: List[str] = ["what can you do?"],
 ):
     response = client.models.generate_content(
         model=model_name,

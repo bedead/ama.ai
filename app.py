@@ -1,5 +1,6 @@
 import logging
 from typing import List
+import strip_markdown
 
 from components.llm.utils import get_gemini_client
 from components.gmail.gmail_toolkit import GmailToolKit
@@ -60,7 +61,13 @@ def main():
                 response_needed = is_mail_response_needed(
                     data=mail_data, json_output=True
                 )
-                if response_needed.get("output", "").lower().strip() == "yes":
+                decision2 = response_needed.get("output", "").lower().strip()
+
+                logger.debug(
+                    f"is_response_needed output: '{decision2}' (ASCII: {[ord(c) for c in decision2]})"
+                )
+
+                if decision2 == "yes":
                     logger.info("Response required for this email.")
 
                     format_response = is_response_proffessional_or_formal(
@@ -75,7 +82,10 @@ def main():
                         response_suggestion = generate_response_suggestion(
                             data=mail_data, response_format_type=response_format
                         )
-                        logger.info(f"Suggested Response: {response_suggestion}")
+                        RESPONSE_TXT: str = strip_markdown.strip_markdown(
+                            response_suggestion
+                        )
+                        logger.info(RESPONSE_TXT)
                     else:
                         logger.info(
                             f"Response format '{response_format}' not suitable for automated suggestion."

@@ -24,8 +24,12 @@ MAIL_SUMMARY_PROMPT = dedent(
 
 GENERATE_MAIL_RESPONSE_SUGGESTION_PROMPT = dedent(
     """
-    Generate a response to the given email data.
-    Mail Response Format Type: {response_foramt}
+    You are an email assistant. Given the content and metadata of an email, analyze the message and automatically generate an appropriate Markdown-formatted response. Choose the best-suited response type from the following options based on the email's content:
+    simple_reply (a basic reply to the sender)
+    detailed_reply (an elaborate reply with follow-up questions or information)
+    forward (forward the email with a comment to another recipient)
+    acknowledgement (confirm receipt of the email)
+    response_format: {chosen_format}  
     """
 )
 
@@ -55,13 +59,15 @@ IS_MAIL_IMPORTANT_PROMPT = dedent(
 
 IS_RESPONSE_NEEDED_PROMPT = dedent(
     """
-    
+    You are an email assistant. Given an email, determine if it requires a response. Reply with only "Yes" or "No" and nothing else.
+    The email may contain the sender, subject, body, date, and other metadata in stringified json format.
     """
 )
 
 
 MAIL_RESPONSE_FORMAT_PROMPT = dedent(
     """
-    
+    You are an email assistant. Given an email, determine the appropriate tone for the response. Reply with only one word: "professional" or "formal".
+    The email may contain the sender, subject, body, date, and other metadata in stringified json format.
     """
 )
