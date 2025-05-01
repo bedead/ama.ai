@@ -1,5 +1,5 @@
-from typing import Any, Dict, List
-
+from typing import Any, Dict
+from google.genai.chats import Chat
 from .BaseLLM import BaseLLM
 from .GoogleProvider import GeminiLLM
 from .GroqProvider import GroqLLM
@@ -19,7 +19,7 @@ from .prompts_utils import (
 class AIToolkit:
     def __init__(self, llm: BaseLLM):
         self.llm = llm
-        self.chat_history: List[Dict[str, str]] = []
+        self.chat_instance: Chat = None
 
     def analyze_importance(
         self, email_data: Dict[str, Any], json_output: bool = False
@@ -75,18 +75,17 @@ class AIToolkit:
         )
         return {"output": response.strip()} if json_output else response
 
-    def chat_response(self, message: str, remember_context: bool = True) -> str:
-        """Generate response using chat history if remember_context is True"""
-        if remember_context:
-            self.chat_history.append({"role": "user", "content": message})
-            response = self.llm.chat(self.chat_history)
-            self.chat_history.append({"role": "assistant", "content": response})
-            return response
-        return self.llm.generate_response(message)
+    def chat_response(self, message: str) -> str:
+        """Generate response using chat based on chat history"""
+        if not self.chat_instance:
+            self.chat_instance = self.llm.initialize_chat()
 
-    def clear_chat_history(self):
-        """Clear the chat history"""
-        self.chat_history = []
+        response = self.llm.chat(message, chat_instance=self.chat_instance)
+        return response
+
+    def clear_chat(self):
+        """Clear the chat"""
+        self.chat_instance = None
 
 
 # Usage example:

@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import List, Dict
+from typing import List
 
 
 class BaseLLM(ABC):
@@ -13,6 +13,6 @@ class BaseLLM(ABC):
         pass
 
     @abstractmethod
-    def chat(self, messages: List[Dict[str, str]], **kwargs) -> str:
+    def chat(self, message: str, **kwargs) -> str:
         """Generate response based on chat history"""
         pass

@@ -1,5 +1,6 @@
-from typing import List, Dict
-from google.genai.types import GenerateContentConfig, HttpOptions
+from typing import List
+from google.genai.chats import Chat
+from google.genai.types import GenerateContentConfig
 from google import genai
 
 from .BaseLLM import BaseLLM
@@ -23,9 +24,10 @@ class GeminiLLM(BaseLLM):
         )
         return response.text
 
-    def chat(self, messages: List[Dict[str, str]], **kwargs) -> str:
-        chat = self.client.start_chat()
-        for message in messages:
-            if message["role"] == "user":
-                response = chat.send_message(message["content"])
+    def initialize_chat(self, **kwargs) -> Chat:
+        """Initialize chat with the model"""
+        return self.client.chats.create(model=self.model_name)
+
+    def chat(self, message: str, **kwargs) -> str:
+        response = kwargs.get("chat_instance").send_message(message)
         return response.text

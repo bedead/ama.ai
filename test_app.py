@@ -11,24 +11,27 @@ email_data = {
     "snippet": "Hey Satyam, how are you doing?",
 }
 
-result = ai_toolkit.analyze_importance(email_data, json_output=True)
-print(result["output"])
-if result["output"].lower() == "yes":
-    print("The email is important.")
-    summary = ai_toolkit.summarize_email(email_data, json_output=True)
-    print("Summary:", summary["output"])
 
-    de1 = ai_toolkit.is_response_needed(email_data, json_output=True)
-    if de1["output"].lower() == "yes":
-        print("A response is needed.")
-        response_format = ai_toolkit.mail_response_format(email_data, json_output=True)
-        print("Response Format:", response_format["output"])
+print(ai_toolkit.chat_response("Hello, how are you?"))
 
-        response = ai_toolkit.generate_response(
-            email_data, json_output=True, style=response_format["output"]
-        )
-        print("Generated Response:", response["output"])
-    else:
-        print("No response needed.")
-else:
-    print("The email is not important.")
+# result = ai_toolkit.analyze_importance(email_data, json_output=True)
+# print(result["output"])
+# if result["output"].lower() == "yes":
+#     print("The email is important.")
+#     summary = ai_toolkit.summarize_email(email_data, json_output=True)
+#     print("Summary:", summary["output"])
+
+#     de1 = ai_toolkit.is_response_needed(email_data, json_output=True)
+#     if de1["output"].lower() == "yes":
+#         print("A response is needed.")
+#         response_format = ai_toolkit.mail_response_format(email_data, json_output=True)
+#         print("Response Format:", response_format["output"])
+
+#         response = ai_toolkit.generate_response(
+#             email_data, json_output=True, style=response_format["output"]
+#         )
+#         print("Generated Response:", response["output"])
+#     else:
+#         print("No response needed.")
+# else:
+#     print("The email is not important.")
