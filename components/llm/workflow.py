@@ -1,8 +1,8 @@
 from typing import Any, Dict, List
 from google.genai.chats import Chat
-from .BaseLLM import BaseLLM
-from .GoogleProvider import GeminiLLM
-from .GroqProvider import GroqLLM
+from .base_llm import BaseLLM
+from .providers.google import GeminiLLM
+from .providers.groq import GroqLLM
 
 
 from .prompts_utils import (

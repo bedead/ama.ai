@@ -5,7 +5,7 @@ import strip_markdown
 from components.llm.utils import get_gemini_client
 from components.gmail.gmail_toolkit import GmailToolKit
 from components.json.reader import JSONEmailReader
-from components.llm.AIToolKit import get_ai_toolkit
+from components.llm.workflow import get_ai_toolkit
 
 # Setup logging
 logging.basicConfig(

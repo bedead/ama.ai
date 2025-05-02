@@ -1,8 +1,8 @@
 from typing import Dict, List
 from google.genai.chats import Chat
 
-from .BaseLLM import BaseLLM
-from .utils import get_google_gemini_key
+from ..base_llm import BaseLLM
+from ..utils import get_google_gemini_key
 
 
 class GeminiLLM(BaseLLM):
