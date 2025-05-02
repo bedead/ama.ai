@@ -68,7 +68,7 @@ class AIToolkit:
         json_output: bool = False,
         style: str = "professional",
     ) -> Dict[str, str] | str:
-        """Generate email response using configured LLM"""
+        """Generate email response suggestion based on format using configured LLM"""
         generate_response_system_instructions.format(style=style)
         response = self.llm.generate_response(
             contents=str(email_data),

@@ -5,6 +5,7 @@ import strip_markdown
 from components.llm.utils import get_gemini_client
 from components.gmail.gmail_toolkit import GmailToolKit
 from components.json.reader import JSONEmailReader
+from components.llm.AIToolKit import get_ai_toolkit
 
 # Setup logging
 logging.basicConfig(
@@ -17,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 def main():
     gmail_tool = GmailToolKit()
+    ai_toolkit = get_ai_toolkit("groq")
     email_reader = JSONEmailReader()
     gmail_tool.start()
 
@@ -38,7 +40,9 @@ def main():
                 f"Processing email from {mail_data['sender']} - Subject: {mail_data['subject']}"
             )
 
-            important_response = is_mail_important(mail_data, json_output=True)
+            important_response = ai_toolkit.analyze_importance(
+                email_data=mail_data, json_output=True
+            )
             decision1 = important_response.get("output", "").lower().strip()
 
             logger.debug(
@@ -48,11 +52,13 @@ def main():
             if decision1 == "yes":
                 logger.info("Email identified as important.")
 
-                summary = mail_summary(data=mail_data)
-                logger.info(f"Summary generated: {summary}")
+                summary = ai_toolkit.summarize_email(
+                    email_data=mail_data, json_output=True
+                )
+                logger.info(f"Summary generated: {summary['output']}")
 
-                response_needed = is_mail_response_needed(
-                    data=mail_data, json_output=True
+                response_needed = ai_toolkit.is_response_needed(
+                    email_data=mail_data, json_output=True
                 )
                 decision2 = response_needed.get("output", "").lower().strip()
 
@@ -63,8 +69,8 @@ def main():
                 if decision2 == "yes":
                     logger.info("Response required for this email.")
 
-                    format_response = is_response_proffessional_or_formal(
-                        data=mail_data, json_output=True
+                    format_response = ai_toolkit.mail_response_format(
+                        email_data=mail_data, json_output=True
                     )
                     response_format = format_response.get("output", "").lower().strip()
 
@@ -72,8 +78,10 @@ def main():
                         logger.info(
                             f"Email format identified as '{response_format}'. Generating response..."
                         )
-                        response_suggestion = generate_response_suggestion(
-                            data=mail_data, response_format_type=response_format
+                        response_suggestion = ai_toolkit.generate_response(
+                            data=mail_data,
+                            response_format_type=response_format,
+                            style=response_format,
                         )
                         RESPONSE_TXT: str = strip_markdown.strip_markdown(
                             response_suggestion
