@@ -5,7 +5,7 @@ from .providers.google import GeminiLLM
 from .providers.groq import GroqLLM
 
 
-from .prompts_utils import (
+from ..utils.prompts import (
     # LLM RESPONSE GENERATE
     IS_MAIL_IMPORTANT_PROMPT as analyze_importance_system_instructions,
     IS_RESPONSE_NEEDED_PROMPT as is_response_needed_system_instructions,
@@ -75,6 +75,11 @@ class AIToolkit:
             system_instruction=generate_response_system_instructions,
         )
         return {"output": response.strip()} if json_output else response
+
+    def add_user_information(
+        self, user_information: Dict[str, Any], json_output: bool = False
+    ):
+        pass
 
     def chat_response(self, message: str) -> str:
         """Generate response using chat based on chat history"""

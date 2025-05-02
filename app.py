@@ -2,9 +2,9 @@ import logging
 from typing import List
 import strip_markdown
 
-from components.gmail.gmail_toolkit import GmailToolKit
-from components.json.reader import JSONEmailReader
-from components.llm.workflow import get_ai_toolkit
+from src.gmail.gmail_toolkit import GmailToolKit
+from src.json.reader import JSONEmailReader
+from src.llm.workflow import get_ai_toolkit
 
 # Setup logging
 logging.basicConfig(

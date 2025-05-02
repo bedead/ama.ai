@@ -2,7 +2,7 @@ from typing import Dict, List
 from google.genai.chats import Chat
 
 from ..base_llm import BaseLLM
-from ..utils import get_google_gemini_key
+from ...utils.utils import get_google_gemini_key
 
 
 class GeminiLLM(BaseLLM):

@@ -1,6 +1,6 @@
 from typing import Any, Dict, List
 from ..base_llm import BaseLLM
-from ..utils import get_groq_key
+from ...utils.utils import get_groq_key
 
 
 class GroqLLM(BaseLLM):
