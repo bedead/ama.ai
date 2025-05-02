@@ -21,7 +21,7 @@ This repository is currently under development. Features and improvements are be
 1. Clone the repository:
 
    ```sh
-   git clone <repo-url>
+   git clone https://github.com/bedead/ama.ai.git
    ```
 
 2. Install dependencies:
