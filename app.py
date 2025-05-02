@@ -30,7 +30,6 @@ def main():
         if not isinstance(emails, list) or not emails:
             logger.info("No emails found.")
             gmail_tool.resume()
-            continue
 
         logger.info(f"Number of emails: {len(emails)}")
         gmail_tool.pause()

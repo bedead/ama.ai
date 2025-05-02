@@ -56,9 +56,12 @@ class GmailToolKit:
         If the token.pickle file is invalid or expired, it refreshes them or prompts for re-authentication. ## yet to be implemented
         """
         creds = None
-        if os.path.exists(self.token_file):
-            with open(self.token_file, "rb") as token:
-                creds = pickle.load(token)
+        try:
+            if os.path.exists(self.token_file):
+                with open(self.token_file, "rb") as token:
+                    creds = pickle.load(token)
+        except Exception as e:
+            print(e)
 
         if not creds or not creds.valid:
             if creds and creds.expired and creds.refresh_token:
