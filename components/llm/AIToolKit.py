@@ -1,4 +1,4 @@
-from typing import Any, Dict
+from typing import Any, Dict, List
 from google.genai.chats import Chat
 from .BaseLLM import BaseLLM
 from .GoogleProvider import GeminiLLM
@@ -18,8 +18,9 @@ from .prompts_utils import (
 
 class AIToolkit:
     def __init__(self, llm: BaseLLM):
-        self.llm = llm
+        self.llm: BaseLLM = llm
         self.chat_instance: Chat = None
+        self.chat_history: List[Dict[str, str]] = []
 
     def analyze_importance(
         self, email_data: Dict[str, Any], json_output: bool = False
@@ -77,15 +78,21 @@ class AIToolkit:
 
     def chat_response(self, message: str) -> str:
         """Generate response using chat based on chat history"""
-        if not self.chat_instance:
+        if not self.chat_instance and self.llm.model_provider == "gemini":
             self.chat_instance = self.llm.initialize_chat()
-
-        response = self.llm.chat(message, chat_instance=self.chat_instance)
+            response = self.llm.chat(message, chat_instance=self.chat_instance)
+        else:
+            self.chat_history.append({"role": "user", "content": message})
+            response = self.llm.chat(
+                self.chat_history, chat_instance=self.chat_instance
+            )
+            self.chat_history.append({"role": "assistant", "content": response})
         return response
 
     def clear_chat(self):
         """Clear the chat"""
         self.chat_instance = None
+        self.chat_history = []
 
 
 # Usage example:

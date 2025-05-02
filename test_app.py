@@ -1,6 +1,6 @@
 from components.llm.AIToolKit import get_ai_toolkit
 
-ai_toolkit = get_ai_toolkit("gemini")
+ai_toolkit = get_ai_toolkit("groq")
 email_data = {
     "id": "196850f189c355ef",
     "subject": "Old friend",
@@ -12,7 +12,10 @@ email_data = {
 }
 
 
+# print(ai_toolkit.generate_response("Hello, how are you?"))
 print(ai_toolkit.chat_response("Hello, how are you?"))
+print(ai_toolkit.chat_history)
+
 
 # result = ai_toolkit.analyze_importance(email_data, json_output=True)
 # print(result["output"])
