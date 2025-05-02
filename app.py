@@ -2,7 +2,6 @@ import logging
 from typing import List
 import strip_markdown
 
-from components.llm.utils import get_gemini_client
 from components.gmail.gmail_toolkit import GmailToolKit
 from components.json.reader import JSONEmailReader
 from components.llm.workflow import get_ai_toolkit
@@ -21,8 +20,6 @@ def main():
     ai_toolkit = get_ai_toolkit("groq")
     email_reader = JSONEmailReader()
     gmail_tool.start()
-
-    client = get_gemini_client()
 
     while True:
         emails: List[dict] = email_reader.get_email_content()
