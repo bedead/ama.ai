@@ -33,7 +33,7 @@ This repository is currently under development. Features and improvements are be
 3. Run the assistant:
 
    ```sh
-   python main.py
+   python app.py
    ```
 
 ## Usage
