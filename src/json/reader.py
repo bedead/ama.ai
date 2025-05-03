@@ -1,8 +1,17 @@
 import os
 import json
 from typing import List
+import logging
 import markdown
 from bs4 import BeautifulSoup
+
+# Setup logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+)
+
+logger = logging.getLogger(__name__)
 
 
 class JSONEmailReader:
@@ -12,7 +21,7 @@ class JSONEmailReader:
     def load_emails(self):
         """Load emails from the JSON file."""
         if not os.path.exists(self.json_file):
-            print(f"Error: {self.json_file} not found.")
+            logger.debug(f"Error: {self.json_file} not found.")
             return []
 
         try:
@@ -20,7 +29,7 @@ class JSONEmailReader:
                 emails = json.load(file)
                 return emails if isinstance(emails, list) else []
         except json.JSONDecodeError:
-            print("Error: Unable to decode JSON file.")
+            logger.debug("Error: Unable to decode JSON file.")
             return []
 
     def extract_text(self, content):
@@ -44,7 +53,7 @@ class JSONEmailReader:
         # Remove extra spaces and newlines
         return " ".join(text.split())
 
-    def get_email_content(self) -> List[dict]:
+    def get_all_email_content(self) -> List[dict]:
         """Return a list of emails with sender, subject, date, and body as plain text."""
         emails = self.load_emails()
         if not emails:
@@ -70,21 +79,21 @@ class JSONEmailReader:
         try:
             with open(self.json_file, "w", encoding="utf-8") as file:
                 json.dump([], file, indent=4)  # Overwrite file with an empty list
-            print("All read emails have been deleted from the JSON file.")
+            logger.debug("All read emails have been deleted from the JSON file.")
         except Exception as e:
-            print(f"Error deleting emails: {e}")
+            logger.debug(f"Error deleting emails: {e}")
 
 
 # Example usage
 if __name__ == "__main__":
     reader = JSONEmailReader()
-    emails = reader.get_email_content()
+    emails = reader.get_all_email_content()
 
     if isinstance(emails, list):
         for email in emails:
-            print(
+            logger.debug(
                 f"From: {email['sender']}\nSubject: {email['subject']}\nDate: {email['date']}\nBody:\n{email['body']}\n"
             )
-            print("=" * 80)  # Separator
+            logger.debug("=" * 80)  # Separator
     else:
-        print(emails)
+        logger.debug(emails)

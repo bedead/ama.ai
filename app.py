@@ -22,17 +22,19 @@ def main():
     gmail_tool.start()
 
     while True:
-        emails: List[dict] = email_reader.get_email_content()
+        emails: List[dict] = email_reader.get_all_email_content()
 
         if not isinstance(emails, list) or not emails:
-            logger.info("No emails found.")
+            # logger.info("No emails found.")
             gmail_tool.resume()
+            continue
 
-        logger.info(f"Number of emails: {len(emails)}")
-        gmail_tool.pause()
+        for i, mail_data in enumerate(emails):
+            if not isinstance(mail_data, dict):
+                logger.error(f"Invalid mail data format: {mail_data}")
+                continue  # Skip this loop iteration
 
-        for mail_data in emails:
-            logger.info(
+            logger.debug(
                 f"Processing email from {mail_data['sender']} - Subject: {mail_data['subject']}"
             )
 
@@ -46,12 +48,12 @@ def main():
             )
 
             if decision1 == "yes":
-                logger.info("Email identified as important.")
+                logger.debug("Email identified as important.")
 
                 summary = ai_toolkit.summarize_email(
                     email_data=mail_data, json_output=True
                 )
-                logger.info(f"Summary generated: {summary['output']}")
+                logger.info(f"AI: {summary['output']}")
 
                 response_needed = ai_toolkit.is_response_needed(
                     email_data=mail_data, json_output=True
@@ -63,7 +65,7 @@ def main():
                 )
 
                 if decision2 == "yes":
-                    logger.info("Response required for this email.")
+                    logger.debug("Response required for this email.")
 
                     format_response = ai_toolkit.mail_response_format(
                         email_data=mail_data, json_output=True
@@ -71,36 +73,30 @@ def main():
                     response_format = format_response.get("output", "").lower().strip()
 
                     if response_format in ["proffessional", "formal"]:
-                        logger.info(
+                        logger.debug(
                             f"Email format identified as '{response_format}'. Generating response..."
                         )
                         response_suggestion = ai_toolkit.generate_response(
-                            data=mail_data,
-                            response_format_type=response_format,
+                            email_data=mail_data,
+                            json_output=True,
                             style=response_format,
                         )
                         RESPONSE_TXT: str = strip_markdown.strip_markdown(
-                            response_suggestion
+                            response_suggestion["output"]
                         )
-                        logger.info(RESPONSE_TXT)
+                        logger.info(f"AI: {RESPONSE_TXT}")
+
                     else:
-                        logger.info(
+                        logger.debug(
                             f"Response format '{response_format}' not suitable for automated suggestion."
                         )
                 else:
-                    logger.info("No response required for this email.")
+                    logger.debug("No response required for this email.")
             else:
-                logger.info(
+                logger.debug(
                     f"Email from {mail_data['sender']} identified as not important. Skipping."
                 )
                 gmail_tool.resume()
-
-        # Prompt user input (manual control loop)
-        question = input("You: ")
-        if question.lower() == "exit":
-            logger.info("Exiting system and stopping Gmail tool.")
-            gmail_tool.stop()
-            break
 
 
 if __name__ == "__main__":

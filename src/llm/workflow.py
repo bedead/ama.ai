@@ -81,16 +81,25 @@ class AIToolkit:
     ):
         pass
 
-    def chat_response(self, message: str) -> str:
+    def chat_response(
+        self,
+        message: str,
+        additional_context: List[Dict[str, List | str]] | str,
+        role: str,
+        tool_calling: bool = False,
+        tool_choice: str = None,
+        tools: List[str] = None,
+        stream: bool = False,
+    ) -> str:
         """Generate response using chat based on chat history"""
-        if not self.chat_instance and self.llm.model_provider == "gemini":
+        if not self.chat_instance and self.llm.model_provider == "google":
             self.chat_instance = self.llm.initialize_chat()
             response = self.llm.chat(message, chat_instance=self.chat_instance)
         else:
+            self.chat_history.append({"role": "system", "content": additional_context})
             self.chat_history.append({"role": "user", "content": message})
-            response = self.llm.chat(
-                self.chat_history, chat_instance=self.chat_instance
-            )
+
+            response = self.llm.chat(self.chat_history)
             self.chat_history.append({"role": "assistant", "content": response})
         return response
 
@@ -101,8 +110,8 @@ class AIToolkit:
 
 
 # Usage example:
-def get_ai_toolkit(llm_type: str = "gemini" or "groq") -> AIToolkit:
-    if llm_type.lower() == "gemini":
+def get_ai_toolkit(llm_type: str = "google" or "groq") -> AIToolkit:
+    if llm_type.lower() == "google":
         llm = GeminiLLM()
     elif llm_type.lower() == "groq":
         llm = GroqLLM()
