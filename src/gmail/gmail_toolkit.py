@@ -10,10 +10,7 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from datetime import datetime, timedelta
 import logging
-
-# from googleapiclient.errors import HttpError
-
-logger = logging.getLogger(__name__)
+from google.oauth2.credentials import Credentials
 
 SCOPES = [
     "https://www.googleapis.com/auth/gmail.readonly",
@@ -42,10 +39,7 @@ class GmailToolKit:
         self.paused = False
         self.last_check_time = None
         self.authenticate()
-
-    def log(self, message):
-        """Utility logging method."""
-        print(f"[{datetime.now()}] {message}")
+        self.logger = logging.getLogger("ama.gmail.gmail_toolkit")
 
     def authenticate(self):
         """
@@ -55,28 +49,28 @@ class GmailToolKit:
         If the token.pickle file does not exist, it creates a new one after successful authentication.
         If the token.pickle file is invalid or expired, it refreshes them or prompts for re-authentication. ## yet to be implemented
         """
-        creds = None
+        creds: Credentials = None
         try:
             if os.path.exists(self.token_file):
                 with open(self.token_file, "rb") as token:
-                    creds = pickle.load(token)
+                    creds: Credentials = pickle.load(token)
         except Exception as e:
-            print(e)
+            self.logger.error(f"Error loading token file: {str(e)}")
 
-        if not creds or not creds.valid:
-            if creds and creds.expired and creds.refresh_token:
-                creds.refresh(Request())
-            else:
-                flow = InstalledAppFlow.from_client_secrets_file(
-                    self.creds_file, SCOPES
-                )
-                creds = flow.run_local_server(port=8080)
+        if creds and creds.token != None and creds.expired == None:
+            creds.refresh(Request())
+            self.logger.debug("Token refreshed successfully.")
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file(self.creds_file, SCOPES)
+            creds: Credentials = flow.run_local_server(port=8080)
+            self.logger.debug("New token generated successfully.")
 
-            with open(self.token_file, "wb") as token:
-                pickle.dump(creds, token)
+        with open(self.token_file, "wb") as token:
+            pickle.dump(creds, token)
+            self.logger.debug("Token saved to pickle file.")
 
         self.service = build("gmail", "v1", credentials=creds)
-        self.log("Authenticated successfully with Gmail API.")
+        self.logger.debug("Authenticated successfully with Gmail API.")
 
     def mark_email_as_read(self, service, message_id):
         """Marks an email as read by removing the UNREAD label."""
@@ -87,7 +81,7 @@ class GmailToolKit:
                 body={"removeLabelIds": ["UNREAD"]},
             ).execute()
         except Exception as e:
-            print(f"Error marking email {message_id} as read: {str(e)}")
+            self.logger(f"Error marking email {message_id} as read: {str(e)}")
 
     def load_existing_emails(self):
         """Load existing emails from JSON file to avoid duplicates."""
@@ -96,6 +90,9 @@ class GmailToolKit:
                 try:
                     return json.load(file)
                 except json.JSONDecodeError:
+                    self.logger.debug(
+                        "JSON Decoder Error occured while loading existing emails from JSON."
+                    )
                     return []
         return []
 
@@ -111,7 +108,9 @@ class GmailToolKit:
             with open(self.json_file, "w") as file:
                 json.dump(existing_emails, file, indent=4)
 
-            # self.log(f"Saved {len(new_emails)} new email(s) to {self.json_file}")
+            self.logger.debug(
+                f"Saved {len(new_emails)} new email(s) to {self.json_file}"
+            )
 
     def get_email_content(self, message_id):
         """Retrieve email content given the email ID."""
@@ -157,7 +156,7 @@ class GmailToolKit:
                 "snippet": message.get("snippet", ""),
             }
         except Exception as e:
-            self.log(f"Error retrieving email {message_id}: {str(e)}")
+            self.logger.debug(f"Error retrieving email {message_id}: {str(e)}")
             return None
 
     def check_emails(
@@ -177,7 +176,9 @@ class GmailToolKit:
                     # Modify the query to fetch emails from that specific date
                     query += f" after:{date_obj.strftime('%Y/%m/%d')} before:{next_day.strftime('%Y/%m/%d')}"
                 except ValueError:
-                    self.log("Invalid date format! Use d,m,y (e.g., 10,3,2024).")
+                    self.logger.debug(
+                        "Invalid date format! Use d,m,y (e.g., 10,3,2024)."
+                    )
                     return []
 
             results = (
@@ -200,7 +201,7 @@ class GmailToolKit:
 
             return emails
         except Exception as e:
-            self.log(f"Error fetching emails: {str(e)}")
+            self.logger.error(f"Error fetching emails: {str(e)}")
             return []
 
     def background_monitor(self, max_results, date):
@@ -219,7 +220,7 @@ class GmailToolKit:
                 self.last_check_time = datetime.now()
                 time.sleep(self.interval)
             except Exception as e:
-                self.log(f"Error in background monitoring: {str(e)}")
+                self.logger.error(f"Error in background monitoring: {str(e)}")
                 time.sleep(self.interval)
 
     def start(self):
@@ -233,14 +234,14 @@ class GmailToolKit:
                 args=(self.max_results, self.date),
             )
             self.monitor_thread.start()
-            self.log("Started monitoring emails...")
+            self.logger.debug("Started monitoring emails...")
         else:
-            self.log("Monitoring is already active.")
+            self.logger.debug("Monitoring is already active.")
 
     def stop(self):
         """Stop the background monitoring thread."""
         self.monitoring_active = False
-        self.log("Stopped monitoring emails.")
+        self.logger.debug("Stopped monitoring emails.")
         if self.monitor_thread:
             self.monitor_thread.join()
 
@@ -248,19 +249,19 @@ class GmailToolKit:
         """Pause the email monitoring process."""
         if self.monitoring_active and not self.paused:
             self.paused = True
-            self.log("Paused email monitoring.")
+            self.logger.debug("Paused email monitoring.")
 
     def resume(self):
         """Resume the paused monitoring process."""
         if self.monitoring_active and self.paused:
             self.paused = False
-            self.log("Resumed email monitoring.")
+            self.logger.debug("Resumed email monitoring.")
 
     def restart(self):
         """Restart the email monitoring process."""
         self.stop()
         self.start()
-        self.log("Restarted email monitoring.")
+        self.logger.debug("Restarted email monitoring.")
 
     def get_mails(self):
         return self.recent_emails

@@ -5,23 +5,16 @@ import logging
 import markdown
 from bs4 import BeautifulSoup
 
-# Setup logging
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-)
-
-logger = logging.getLogger(__name__)
-
 
 class JSONEmailReader:
     def __init__(self, json_file="emails.json"):
         self.json_file = json_file
+        self.logger = logging.getLogger("ama.json.reader")
 
     def load_emails(self):
         """Load emails from the JSON file."""
         if not os.path.exists(self.json_file):
-            logger.debug(f"Error: {self.json_file} not found.")
+            self.logger.debug(f"Error: {self.json_file} not found.")
             return []
 
         try:
@@ -29,7 +22,7 @@ class JSONEmailReader:
                 emails = json.load(file)
                 return emails if isinstance(emails, list) else []
         except json.JSONDecodeError:
-            logger.debug("Error: Unable to decode JSON file.")
+            self.logger.debug("Error: Unable to decode JSON file.")
             return []
 
     def extract_text(self, content):
@@ -47,7 +40,10 @@ class JSONEmailReader:
                 html_content = markdown.markdown(content)
                 soup = BeautifulSoup(html_content, "html.parser")
                 text = soup.get_text(separator=" ").strip()
-            except Exception:
+            except Exception as e:
+                self.logger.error(
+                    f"Exception {e} occured while extracting text from HTML or MD"
+                )
                 text = content.strip()
 
         # Remove extra spaces and newlines
@@ -79,9 +75,9 @@ class JSONEmailReader:
         try:
             with open(self.json_file, "w", encoding="utf-8") as file:
                 json.dump([], file, indent=4)  # Overwrite file with an empty list
-            logger.debug("All read emails have been deleted from the JSON file.")
+            self.logger.debug("All read emails have been deleted from the JSON file.")
         except Exception as e:
-            logger.debug(f"Error deleting emails: {e}")
+            self.logger.debug(f"Error deleting emails: {e}")
 
 
 # Example usage
@@ -91,9 +87,9 @@ if __name__ == "__main__":
 
     if isinstance(emails, list):
         for email in emails:
-            logger.debug(
+            print(
                 f"From: {email['sender']}\nSubject: {email['subject']}\nDate: {email['date']}\nBody:\n{email['body']}\n"
             )
-            logger.debug("=" * 80)  # Separator
+            print("=" * 80)  # Separator
     else:
-        logger.debug(emails)
+        print(emails)

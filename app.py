@@ -6,16 +6,12 @@ from src.gmail.gmail_toolkit import GmailToolKit
 from src.json.reader import JSONEmailReader
 from src.llm.workflow import get_ai_toolkit
 
-# Setup logging
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
-)
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("ama.app")
 
 
 def main():
+    logger.debug("Starting Mail Assistant application...")
     gmail_tool = GmailToolKit()
     ai_toolkit = get_ai_toolkit("groq")
     email_reader = JSONEmailReader()
@@ -25,7 +21,7 @@ def main():
         emails: List[dict] = email_reader.get_all_email_content()
 
         if not isinstance(emails, list) or not emails:
-            # logger.info("No emails found.")
+            logger.debug("No emails found.")
             gmail_tool.resume()
             continue
 
