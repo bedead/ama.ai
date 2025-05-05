@@ -38,8 +38,9 @@ class GmailToolKit:
         self.monitor_thread = None
         self.paused = False
         self.last_check_time = None
+        self.logger: logging.Logger = logging.getLogger("ama.gmail.gmail_toolkit")
         self.authenticate()
-        self.logger = logging.getLogger("ama.gmail.gmail_toolkit")
+        self.logger.debug("GmailToolKit initialized.")
 
     def authenticate(self):
         """
@@ -56,14 +57,16 @@ class GmailToolKit:
                     creds: Credentials = pickle.load(token)
         except Exception as e:
             self.logger.error(f"Error loading token file: {str(e)}")
-
-        if creds and creds.token != None and creds.expired == None:
-            creds.refresh(Request())
-            self.logger.debug("Token refreshed successfully.")
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file(self.creds_file, SCOPES)
-            creds: Credentials = flow.run_local_server(port=8080)
-            self.logger.debug("New token generated successfully.")
+        if not creds:
+            if creds and creds.refresh_token and creds.expired:
+                creds.refresh(Request())
+                self.logger.debug("Token refreshed successfully.")
+            else:
+                flow = InstalledAppFlow.from_client_secrets_file(
+                    self.creds_file, SCOPES
+                )
+                creds: Credentials = flow.run_local_server(port=8080)
+                self.logger.debug("New token generated successfully.")
 
         with open(self.token_file, "wb") as token:
             pickle.dump(creds, token)
@@ -81,7 +84,7 @@ class GmailToolKit:
                 body={"removeLabelIds": ["UNREAD"]},
             ).execute()
         except Exception as e:
-            self.logger(f"Error marking email {message_id} as read: {str(e)}")
+            self.logger.debug(f"Error marking email {message_id} as read: {str(e)}")
 
     def load_existing_emails(self):
         """Load existing emails from JSON file to avoid duplicates."""

@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 import logging
 
 from google.genai.chats import Chat
@@ -10,11 +10,12 @@ from .providers.groq import GroqLLM
 
 from ..utils.prompts import (
     # LLM RESPONSE GENERATE
-    IS_MAIL_IMPORTANT_PROMPT as analyze_importance_system_instructions,
-    IS_RESPONSE_NEEDED_PROMPT as is_response_needed_system_instructions,
-    # ROUTES FOR DECISION MAKING
     MAIL_SUMMARY_PROMPT as summarize_email_system_instructions,
     GENERATE_MAIL_RESPONSE_SUGGESTION_PROMPT as generate_response_system_instructions,
+    EDIT_SUGGESTED_RESPONSE_PROMPT as edit_response_system_instructions,
+    # ROUTES FOR DECISION MAKING
+    IS_MAIL_IMPORTANT_PROMPT as analyze_importance_system_instructions,
+    IS_RESPONSE_NEEDED_PROMPT as is_response_needed_system_instructions,
     MAIL_RESPONSE_FORMAT_PROMPT as mail_response_format_system_instructions,
 )
 
@@ -98,6 +99,27 @@ class AIToolkit:
             return {"output": response.strip()} if json_output else response
         except Exception as e:
             self.log.error(f"Error generating response: {e}")
+            return {"output": "Error"}
+
+    def edit_response(
+        self,
+        email_data: Dict[str, Any],
+        json_output: bool = False,
+        style: str = "professional",
+        additional_context: Optional[str | List[str] | Dict] = None,
+    ) -> Dict[str, str] | str:
+        """Edit email response suggestion based on format using configured LLM"""
+        try:
+            edit_response_system_instructions.format(
+                style=style, additional_context=additional_context
+            )
+            response = self.llm.generate_response(
+                contents=str(email_data),
+                system_instruction=edit_response_system_instructions,
+            )
+            return {"output": response.strip()} if json_output else response
+        except Exception as e:
+            self.log.error(f"Error editing response: {e}")
             return {"output": "Error"}
 
     def add_user_information(

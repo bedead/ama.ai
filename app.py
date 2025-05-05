@@ -82,6 +82,32 @@ def main():
                         )
                         logger.info(f"AI: {RESPONSE_TXT}")
 
+                        approve = input("Approve response? (y/n): ").strip().lower()
+                        if approve == "y":
+                            logger.debug("Response approved. Sending...")
+                            gmail_tool.send_response(
+                                mail_data["sender"],
+                                mail_data["subject"],
+                                RESPONSE_TXT,
+                            )
+                        else:
+                            enable_edit = (
+                                input("Do you want to edit the response? (y/n): ")
+                                .strip()
+                                .lower()
+                            )
+                            if enable_edit == "y":
+                                logger.debug("Starting response editing...")
+                                edited_response = input("Edit the response: ").strip()
+                                gmail_tool.send_response(
+                                    mail_data["sender"],
+                                    mail_data["subject"],
+                                    edited_response,
+                                )
+                            else:
+                                logger.debug("Response not approved. Skipping...")
+                            logger.debug("Response not approved. Skipping...")
+
                     else:
                         logger.debug(
                             f"Response format '{response_format}' not suitable for automated suggestion."

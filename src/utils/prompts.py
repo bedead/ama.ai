@@ -33,6 +33,12 @@ GENERATE_MAIL_RESPONSE_SUGGESTION_PROMPT = dedent(
     """
 )
 
+EDIT_SUGGESTED_RESPONSE_PROMPT = dedent(
+    """
+    
+    """
+)
+
 
 ## ROUTES FOR DECISION MAKING
 
