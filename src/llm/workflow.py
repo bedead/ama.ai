@@ -25,7 +25,7 @@ class AIToolkit:
         self.llm: BaseLLM = llm
         self.chat_instance: Chat = None
         self.chat_history: List[Dict[str, str]] = []
-        self.log = logging.getLogger("ama.llm.workflow")
+        self.log = logging.getLogger(__name__)
 
     def analyze_importance(
         self, email_data: Dict[str, Any], json_output: bool = False

@@ -13,7 +13,7 @@ class GeminiLLM(BaseLLM):
         self.model_provider = "google"
         self.client = genai.Client(api_key=get_google_gemini_key())
         self.model_name = model_name
-        self.logger = logging.getLogger("ama.llm.providers.google")
+        self.logger = logging.getLogger(__name__)
 
     def generate_response(
         self, contents: str | List[str], system_instruction, **kwargs

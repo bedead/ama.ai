@@ -1,8 +1,7 @@
+from datetime import datetime
 import logging
 import os
 from typing import Optional
-
-logger: logging.Logger = logging.getLogger("ama")
 
 
 def _basic_config() -> None:
@@ -14,31 +13,35 @@ def _basic_config() -> None:
     )
 
 
+def _get_log_filename() -> str:
+    """Generate a valid log filename using current timestamp"""
+    timestamp = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
+    return f"./logs/{timestamp}.log"
+
+
 def setup_logging(
     log_type: Optional[str] = None, log_file: Optional[str] = None
-) -> None:
-    env = log_type or os.environ.get("LOG_TYPE")
-    print(f"env: {env}")
-    file_path = log_file or os.environ.get("LOG_FILE_PATH", "ama.log")
+) -> logging.Logger:
+    logger: logging.Logger = logging.getLogger()
     _basic_config()
+
+    env = log_type or os.environ.get("LOG_TYPE")
+    print(f"log env: {env}")
+    file_path = log_file or os.environ.get("LOG_FILE_PATH", _get_log_filename())
+    fh = logging.FileHandler(filename=file_path)
+    ch = logging.StreamHandler()
 
     if env == "debug":
         logger.setLevel(logging.DEBUG)
         # create file handler which logs even debug messages
-        fh = logging.FileHandler(filename=file_path)
         fh.setLevel(logging.DEBUG)
-
-        # create console handler with a higher log level
-        ch = logging.StreamHandler()
-        ch.setLevel(logging.INFO)
+        ch.setLevel(logging.DEBUG)
     elif env == "info":
-        logger.setLevel(logging.INFO)
-        fh = logging.FileHandler(filename=file_path)
         fh.setLevel(logging.DEBUG)
-
-        # create console handler with a higher log level
-        ch = logging.StreamHandler()
-        ch.setLevel(logging.WARNING)
+        ch.setLevel(logging.INFO)
+        logger.setLevel(logging.INFO)
 
     logger.addHandler(fh)
     logger.addHandler(ch)
+
+    return logger

@@ -38,7 +38,7 @@ class GmailToolKit:
         self.monitor_thread = None
         self.paused = False
         self.last_check_time = None
-        self.logger: logging.Logger = logging.getLogger("ama.gmail.gmail_toolkit")
+        self.logger: logging.Logger = logging.getLogger(__name__)
         self.authenticate()
         self.logger.debug("GmailToolKit initialized.")
 

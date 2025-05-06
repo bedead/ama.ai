@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup
 class JSONEmailReader:
     def __init__(self, json_file="emails.json"):
         self.json_file = json_file
-        self.logger = logging.getLogger("ama.json.reader")
+        self.logger = logging.getLogger(__name__)
 
     def load_emails(self):
         """Load emails from the JSON file."""

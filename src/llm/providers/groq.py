@@ -11,7 +11,7 @@ class GroqLLM(BaseLLM):
         self.model_provider = "groq"
         self.client = Groq(api_key=get_groq_key())
         self.model = model_name
-        self.logger = logging.getLogger("ama.llm.providers.groq")
+        self.logger = logging.getLogger(__name__)
 
     def generate_response(
         self, contents: str | List[str], system_instruction: str = None, **kwargs
