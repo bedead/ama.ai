@@ -163,9 +163,12 @@ class AIToolkit:
 
 # Usage example:
 def get_ai_toolkit(llm_type: str = "google" or "groq") -> AIToolkit:
-    if llm_type.lower() == "google":
-        llm = GeminiLLM()
-    elif llm_type.lower() == "groq":
-        llm = GroqLLM()
+    try:
+        if llm_type.lower() == "google":
+            llm = GeminiLLM()
+        elif llm_type.lower() == "groq":
+            llm = GroqLLM()
+    except ValueError as e:
+        raise ValueError(f"Unsupported LLM type: {llm_type}") from e
     # Add more LLM implementations as needed
     return AIToolkit(llm)

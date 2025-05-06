@@ -37,9 +37,9 @@ def setup_logging(
         fh.setLevel(logging.DEBUG)
         ch.setLevel(logging.DEBUG)
     elif env == "info":
+        logger.setLevel(logging.INFO)
         fh.setLevel(logging.DEBUG)
         ch.setLevel(logging.INFO)
-        logger.setLevel(logging.INFO)
 
     logger.addHandler(fh)
     logger.addHandler(ch)

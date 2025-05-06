@@ -14,8 +14,8 @@ def main():
     logger = setup_logging()
     logger.debug("Starting Mail Assistant application...")
 
-    gmail_tool = GmailToolKit()
-    ai_toolkit = get_ai_toolkit("groq")
+    gmail_tool = GmailToolKit(interval=1, max_results=2)
+    ai_toolkit = get_ai_toolkit("google")
     email_reader = JSONEmailReader()
     gmail_tool.start()
 
@@ -32,8 +32,8 @@ def main():
                 logger.error(f"Invalid mail data format: {mail_data}")
                 continue  # Skip this loop iteration
 
-            logger.debug(
-                f"Processing email from {mail_data['sender']} - Subject: {mail_data['subject']}"
+            logger.info(
+                f"Processing email from {mail_data['sender']} - Subject: {mail_data['subject']} - {mail_data['date']}"
             )
 
             important_response = ai_toolkit.analyze_importance(
@@ -41,12 +41,10 @@ def main():
             )
             decision1 = important_response.get("output", "").lower().strip()
 
-            logger.debug(
-                f"is_mail_important output: '{decision1}' (ASCII: {[ord(c) for c in decision1]})"
-            )
+            logger.debug(f"is_mail_important output: {decision1}")
 
             if decision1 == "yes":
-                logger.debug("Email identified as important.")
+                logger.info("Email identified as important.")
 
                 summary = ai_toolkit.summarize_email(
                     email_data=mail_data, json_output=True
@@ -58,12 +56,10 @@ def main():
                 )
                 decision2 = response_needed.get("output", "").lower().strip()
 
-                logger.debug(
-                    f"is_response_needed output: '{decision2}' (ASCII: {[ord(c) for c in decision2]})"
-                )
+                logger.debug(f"is_response_needed output: {decision2}")
 
                 if decision2 == "yes":
-                    logger.debug("Response required for this email.")
+                    logger.info("Response required for this email.")
 
                     format_response = ai_toolkit.mail_response_format(
                         email_data=mail_data, json_output=True
@@ -71,7 +67,7 @@ def main():
                     response_format = format_response.get("output", "").lower().strip()
 
                     if response_format in ["proffessional", "formal"]:
-                        logger.debug(
+                        logger.info(
                             f"Email format identified as '{response_format}'. Generating response..."
                         )
                         response_suggestion = ai_toolkit.generate_response(
@@ -86,7 +82,7 @@ def main():
 
                         approve = input("Approve response? (y/n): ").strip().lower()
                         if approve == "y":
-                            logger.debug("Response approved. Sending...")
+                            logger.info("Response approved. Sending...")
                             gmail_tool.send_response(
                                 mail_data["sender"],
                                 mail_data["subject"],
@@ -99,7 +95,7 @@ def main():
                                 .lower()
                             )
                             if enable_edit == "y":
-                                logger.debug("Starting response editing...")
+                                logger.info("Starting response editing...")
                                 edited_response = input("Edit the response: ").strip()
                                 gmail_tool.send_response(
                                     mail_data["sender"],
@@ -107,17 +103,17 @@ def main():
                                     edited_response,
                                 )
                             else:
-                                logger.debug("Response not approved. Skipping...")
-                            logger.debug("Response not approved. Skipping...")
+                                logger.info("Response not approved. Skipping...")
+                            logger.info("Response not approved. Skipping...")
 
                     else:
                         logger.debug(
                             f"Response format '{response_format}' not suitable for automated suggestion."
                         )
                 else:
-                    logger.debug("No response required for this email.")
+                    logger.info("No response required for this email.")
             else:
-                logger.debug(
+                logger.info(
                     f"Email from {mail_data['sender']} identified as not important. Skipping."
                 )
                 gmail_tool.resume()
