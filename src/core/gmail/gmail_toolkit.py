@@ -61,17 +61,21 @@ class GmailToolKit:
                     creds: Credentials = pickle.load(token)
         except Exception as e:
             self.logger.error(f"Error loading token file: {str(e)}")
-        if creds and creds.valid:
-            creds.refresh(Request())
-            self.logger.debug("Token refreshed successfully.")
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file(self.creds_file, SCOPES)
-            creds: Credentials = flow.run_local_server(port=8080)
-            self.logger.debug("New token generated successfully.")
+        if not creds or not creds.valid:
+            if creds and creds.expired and creds.refresh_token:
+                self.logger.debug("Refreshing expired token...")
+                creds.refresh(Request())
+                self.logger.debug("Token refreshed successfully.")
+            else:
+                flow = InstalledAppFlow.from_client_secrets_file(
+                    self.creds_file, SCOPES
+                )
+                creds: Credentials = flow.run_local_server(port=8080)
+                self.logger.debug("New token generated successfully.")
 
-        with open(self.token_file, "wb") as token:
-            pickle.dump(creds, token)
-            self.logger.debug("Token saved to pickle file.")
+            with open(self.token_file, "wb") as token:
+                pickle.dump(creds, token)
+                self.logger.debug("Token saved to pickle file.")
 
         self.service = build("gmail", "v1", credentials=creds)
         self.logger.debug("Authenticated successfully with Gmail API.")
@@ -112,7 +116,7 @@ class GmailToolKit:
             with open(self.json_file, "w") as file:
                 json.dump(existing_emails, file, indent=4)
 
-            self.logger.info(
+            self.logger.debug(
                 f"Saved {len(new_emails)} new email(s) to {self.json_file}"
             )
 
@@ -223,7 +227,7 @@ class GmailToolKit:
                     self.save_emails_to_json(self.recent_emails)
 
                 self.last_check_time = datetime.now()
-                self.logger.info(f"Going to sleep for {self.interval} seconds...")
+                self.logger.debug(f"Going to sleep for {self.interval} seconds...")
                 time.sleep(self.interval)
             except Exception as e:
                 self.logger.error(f"Error in background monitoring: {str(e)}")

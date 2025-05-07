@@ -3,7 +3,7 @@ import logging
 
 from google.genai.chats import Chat
 
-from .base_llm import BaseLLM
+from .base_llm import BaseLLMArch
 from .providers.google import GeminiLLM
 from .providers.groq import GroqLLM
 
@@ -21,8 +21,8 @@ from ..utils.prompts import (
 
 
 class AIToolkit:
-    def __init__(self, llm: BaseLLM):
-        self.llm: BaseLLM = llm
+    def __init__(self, llm: BaseLLMArch):
+        self.llm: BaseLLMArch = llm
         self.chat_instance: Chat = None
         self.chat_history: List[Dict[str, str]] = []
         self.log = logging.getLogger(__name__)
@@ -161,14 +161,20 @@ class AIToolkit:
         self.chat_history = []
 
 
+from .providers.types.providers import BaseProvider
+from .providers.types.model_selector import ModelSelector
+
+
 # Usage example:
-def get_ai_toolkit(llm_type: str = "google" or "groq") -> AIToolkit:
+def get_ai_toolkit(model: ModelSelector) -> AIToolkit:
     try:
-        if llm_type.lower() == "google":
-            llm = GeminiLLM()
-        elif llm_type.lower() == "groq":
-            llm = GroqLLM()
+        if model.provider.value == BaseProvider.GOOGLE.value:
+            llm = GeminiLLM(model_name=model.get_model_string())
+        elif model.provider.value == BaseProvider.GROQ.value:
+            llm = GroqLLM(model_name=model.get_model_string())
     except ValueError as e:
-        raise ValueError(f"Unsupported LLM type: {llm_type}") from e
+        raise ValueError(
+            f"Unsupported LLM provider: {model.provider.value} and model name: {model.get_model_string()}, Exception: {e}"
+        )
     # Add more LLM implementations as needed
     return AIToolkit(llm)

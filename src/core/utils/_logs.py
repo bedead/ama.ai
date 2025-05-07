@@ -23,6 +23,7 @@ def setup_logging(
     log_type: Optional[str] = None, log_file: Optional[str] = None
 ) -> logging.Logger:
     logger: logging.Logger = logging.getLogger()
+    logger.propagate = False  # Prevents double logging in root logger
     _basic_config()
 
     env = log_type or os.environ.get("LOG_TYPE")

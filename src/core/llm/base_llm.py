@@ -2,8 +2,8 @@ from abc import ABC, abstractmethod
 from typing import Dict, List
 
 
-class BaseLLM(ABC):
-    """Abstract base class for LLM implementations"""
+class BaseLLMArch(ABC):
+    """Abstract base class for LLM callings implementations"""
 
     model_provider: str = None
 

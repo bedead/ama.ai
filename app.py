@@ -1,10 +1,16 @@
 from typing import List
 import strip_markdown
 
-from src.gmail.gmail_toolkit import GmailToolKit
-from src.json.reader import JSONEmailReader
-from src.llm.workflow import get_ai_toolkit
-from src.utils._logs import setup_logging
+from src.core.gmail.gmail_toolkit import GmailToolKit
+from src.core.json.reader import JSONEmailReader
+from src.core.llm.workflow import get_ai_toolkit
+from src.core.utils._logs import setup_logging
+
+
+from src.core.llm.providers.types.model_selector import ModelSelector
+from src.core.llm.providers.types.providers import BaseProvider
+from src.core.llm.providers.types.models_google import GoogleModel
+from src.core.llm.providers.types.models_groq import GroqModel
 
 # logger = logging.getLogger()
 # logger.setLevel(logging.INFO)
@@ -15,7 +21,10 @@ def main():
     logger.debug("Starting Mail Assistant application...")
 
     gmail_tool = GmailToolKit(interval=1, max_results=2)
-    ai_toolkit = get_ai_toolkit("google")
+    selected_model = ModelSelector(
+        provider=BaseProvider.GOOGLE, model=GoogleModel.GEMINI_1_5_FLASH
+    )
+    ai_toolkit = get_ai_toolkit(model=selected_model)
     email_reader = JSONEmailReader()
     gmail_tool.start()
 
@@ -44,7 +53,7 @@ def main():
             logger.debug(f"is_mail_important output: {decision1}")
 
             if decision1 == "yes":
-                logger.info("Email identified as important.")
+                logger.debug("Email identified as important.")
 
                 summary = ai_toolkit.summarize_email(
                     email_data=mail_data, json_output=True
@@ -59,7 +68,7 @@ def main():
                 logger.debug(f"is_response_needed output: {decision2}")
 
                 if decision2 == "yes":
-                    logger.info("Response required for this email.")
+                    logger.debug("Response required for this email.")
 
                     format_response = ai_toolkit.mail_response_format(
                         email_data=mail_data, json_output=True

@@ -9,7 +9,7 @@ load_dotenv()
 
 def get_google_gemini_key():
     """Get the Google Gemini API key from environment variables."""
-    return os.environ.get("GEMINI_API_KEY")
+    return os.environ.get("GOOGLE_API_KEY")
 
 
 def get_groq_key():

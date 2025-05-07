@@ -1,18 +1,19 @@
 from typing import Dict, List
 import logging
 from google.genai.chats import Chat
-
-from ..base_llm import BaseLLM
+from .types.providers import BaseProvider
+from .types.models_google import GoogleModel
+from ..base_llm import BaseLLMArch
 from ...utils.utils import get_google_gemini_key
 
 
-class GeminiLLM(BaseLLM):
+class GeminiLLM(BaseLLMArch):
     def __init__(self, model_name: str = "gemini-1.5-flash"):
         from google import genai
 
-        self.model_provider = "google"
+        self.model_provider = BaseProvider.GOOGLE
         self.client = genai.Client(api_key=get_google_gemini_key())
-        self.model_name = model_name
+        self.model_name: GoogleModel = model_name
         self.logger = logging.getLogger(__name__)
 
     def generate_response(

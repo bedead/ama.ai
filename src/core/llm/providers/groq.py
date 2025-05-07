@@ -1,14 +1,16 @@
 import logging
 from typing import Any, Dict, List
-from ..base_llm import BaseLLM
+
+from .types.providers import BaseProvider
+from ..base_llm import BaseLLMArch
 from ...utils.utils import get_groq_key
 
 
-class GroqLLM(BaseLLM):
+class GroqLLM(BaseLLMArch):
     def __init__(self, model_name: str = "llama-3.3-70b-versatile"):
         from groq import Groq
 
-        self.model_provider = "groq"
+        self.model_provider = BaseProvider.GROQ
         self.client = Groq(api_key=get_groq_key())
         self.model = model_name
         self.logger = logging.getLogger(__name__)
