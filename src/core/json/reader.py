@@ -50,7 +50,10 @@ class JSONEmailReader:
         return " ".join(text.split())
 
     def get_all_email_content(self) -> List[dict]:
-        """Return a list of emails with sender, subject, date, and body as plain text."""
+        """
+        Return a list of emails with sender, subject, date, and body as plain text.
+        Deletes the emails from the JSON file after reading them.
+        """
         emails = self.load_emails()
         if not emails:
             return "No emails found."
