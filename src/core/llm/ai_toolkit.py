@@ -104,6 +104,7 @@ class AIToolkit:
     def edit_response(
         self,
         email_data: Dict[str, Any],
+        draft_mail: str,
         json_output: bool = False,
         style: str = "professional",
         additional_context: Optional[str | List[str] | Dict] = None,
@@ -116,6 +117,7 @@ class AIToolkit:
             response = self.llm.generate_response(
                 contents=str(email_data),
                 system_instruction=edit_response_system_instructions,
+                draft_mail=draft_mail,
             )
             return {"output": response.strip()} if json_output else response
         except Exception as e:

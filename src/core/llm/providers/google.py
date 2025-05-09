@@ -22,12 +22,16 @@ class GeminiLLM(BaseLLMArch):
         from google.genai.types import GenerateContentConfig
 
         try:
+            user_contents = [contents]
+            user_contents.append(
+                value for value in kwargs.values() if value is not None
+            )
             response = self.client.models.generate_content(
                 model=self.model_name,
                 config=GenerateContentConfig(
                     system_instruction=system_instruction,
                 ),
-                contents=contents,
+                contents=user_contents,
             )
             return response.text
         except Exception as e:

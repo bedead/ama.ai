@@ -275,6 +275,19 @@ class GmailToolKit:
     def get_mails(self):
         return self.recent_emails
 
+    def send_mail(self, to, subject, body):
+        """Send an email using the Gmail API."""
+        try:
+            message = {
+                "raw": base64.urlsafe_b64encode(
+                    f"From: me\nTo: {to}\nSubject: {subject}\n\n{body}".encode("utf-8")
+                ).decode("utf-8")
+            }
+            self.service.users().messages().send(userId="me", body=message).execute()
+            self.logger.debug(f"Email sent to {to} with subject '{subject}'")
+        except Exception as e:
+            self.logger.error(f"Error sending email: {str(e)}")
+
 
 # Example usage
 if __name__ == "__main__":

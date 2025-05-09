@@ -45,3 +45,10 @@ def get_chat_gemini_response(
     chat = client.chats.create(model=model_name)
     response = chat.send_message(message=question)
     return response
+
+
+def display_graph(compiled_graph):
+    """
+    Display the image of the compiled graph.
+    """
+    compiled_graph.get_graph().draw_mermaid_png()
